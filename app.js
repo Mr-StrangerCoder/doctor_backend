@@ -5,6 +5,7 @@ const cors = require('cors')
 
 const dbConn = require('./config/db')
 const userRouter = require('./routes/userRoute')
+const doctorRouter = require('./routes/doctorRoute')
 
 
 
@@ -20,6 +21,8 @@ app.get('/',(req,res)=>{
 
 // create route user 
 app.use('/user',userRouter)
+app.use('/doctor',doctorRouter)
+
 
 
 app.listen(port,()=>{
