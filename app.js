@@ -1,7 +1,8 @@
-const express = require('express')
 require('dotenv').config()
+const express = require('express')
+
 const cors = require('cors')
-// const path =require('path')
+const path =require('path')
 
 const dbConn = require('./config/db')
 const userRouter = require('./routes/userRoute')
@@ -21,9 +22,12 @@ app.get('/',(req,res)=>{
 
 // create route user 
 app.use('/user',userRouter)
+
 app.use('/doctor',doctorRouter)
+app.use('/appoint',require('./routes/appointmentRoute'))
 
 
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.listen(port,()=>{
     console.log(`server running on http://localhost:${port}`)

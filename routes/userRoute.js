@@ -10,8 +10,8 @@ router.get('/getUserInfo',auth, userController.getUserInfo)
 
 // router.patch('/updateUser/:user_Id', auth, userController.updateUser)
 
-// router.get('/getAllUsers', userController.getAllUsers)
+router.get('/getAllUsers', userController.getAllUsers)
 
-// router.get('/getAllDoctors', auth, admin, userController.getAllDoctors)
+router.get('/getAllDoctors', userController.getAllDoctors)
 
 module.exports =router

@@ -2,9 +2,9 @@ const User = require('../models/userModel')
 const bcryptjs = require('bcryptjs')
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
-// const Doctor = require('../models/doctorModel')
+const Doctor = require('../models/doctorModel')
 
-const BASE_URL = 'http://localhost:5010/upload/'
+const BASE_URL = 'http://localhost:5000/upload/';
 
 
 const register = async (req,res) =>{
@@ -15,9 +15,9 @@ const register = async (req,res) =>{
     const imgPATH =req.file ?  req.file.filename : null
     console.log(imgPATH, "%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     try {
-        existsUser = await User.findOne({email:email})
+     const existsUser = await User.findOne({email:email})
         if(existsUser){
-            res.status(400).send({ msg: "email already registered" })
+          return  res.status(400).send({ msg: "email already registered" })
         }
         else{
             const salt = await bcryptjs.genSalt(8)
@@ -42,6 +42,7 @@ const register = async (req,res) =>{
 
         }
     } catch (error) {
+        console.log(error, "rrrrrrrrrrrrrrrrrrrrrrrrrrr")
         res.status(500).send({ success: false, msg: "Server Error" })
         
     }
@@ -57,7 +58,7 @@ const login = async (req,res) =>{
         if(!alreadyUser) {
             res.status(400).send({ msg: "User not found" })
         } else {
-            checkPassword = await bcryptjs.compare(password, alreadyUser.password)
+         const checkPassword = await bcryptjs.compare(password, alreadyUser.password)
             console.log(checkPassword)
             if (!checkPassword) {
                 res.status(400).send({ msg: "Invalid Password" })
@@ -66,8 +67,9 @@ const login = async (req,res) =>{
                 const ID = alreadyUser._id
                 const role = alreadyUser.role
                 console.log(ID,"******ID")
-                const genToken = jwt.sign({ ID: ID,role:role }, process.env.SECREAT_KEY, { expiresIn: "1hr" })
+                const genToken = jwt.sign({ ID: ID,role:role }, process.env.SECRET_KEY, { expiresIn: "1h" })
                 console.log(genToken,"******")
+                console.log("SECRET at sign time:", process.env.SECRET_KEY)
                 res.status(202).send({success:true, msg: "Login successful", token: genToken })
             }
 
@@ -96,10 +98,65 @@ const getUserInfo = async(req,res) =>{
     }
 }
 
+const getAllUsers = async (req,res)=>{
+    try{
+
+        const users = await User.find({},{name:1,email:1,contactNumber:1,role:1,DOB:1,img_path:1})
+        // console.log(users)
+                const updatedUsers = users.map(user => {
+            const userObj = user.toObject();
+
+            userObj.img_path = userObj.img_path
+                ? BASE_URL + userObj.img_path
+                : null;
+
+            return userObj;
+        });
+        res.status(200).send({users:updatedUsers})
+    }catch (error) {
+        res.status(500).send({ success: false, msg: "Server Error" })
+        
+    }
+}
+
+
+const getAllDoctors = async(req,res)=>{
+    try {
+
+        const doctors = await Doctor.find({isDoctor:true})
+            .populate({
+                path: "user_id",
+                select: "name contactNumber role img_path email DOB"
+            });
+
+        const updatedDoctors = doctors.map(doc => {
+            const docObj = doc.toObject();
+
+            // Handle user data
+            if (docObj.user_id) {
+                docObj.user_id.img_path = docObj.user_id.img_path
+                    ? BASE_URL + docObj.user_id.img_path
+                    : null;
+            }
+
+            return docObj;
+        });
+             res.status(200).json({ success: true, doctors: updatedDoctors });
+
+        
+    } catch (error) {
+        res.status(500).send({ success: false, msg: "Server Error" })
+        
+    }
+}
+
+
 
 module.exports = {
     register,
     login,
     getUserInfo,
+    getAllUsers,
+    getAllDoctors
    
 }
