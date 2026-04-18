@@ -135,13 +135,30 @@ async function delAppointment(req, res) {
 }
 
 async function updateAppointment(req, res) {
+    const APP_ID = req.params.appID;
+
     try {
+        const updatedApp = await Appointment.findByIdAndUpdate(
+            APP_ID,
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedApp) {
+            return res.status(404).send({ msg: "Appointment not found" });
+        }
+
+        res.status(200).send({
+            msg: "Appointment updated successfully",
+            app: updatedApp
+        });
 
     } catch (error) {
-        res.status(500).send({ success: false, msg: "Server Error" })
-
+        res.status(500).send({ success: false, msg: "Server Error" });
     }
 }
+
+
 async function statusUpdate(req, res) {
     console.log(req.params.appID)
     console.log((req.body.status))
