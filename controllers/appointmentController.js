@@ -118,12 +118,19 @@ async function getAppointmentOfDoctor(req, res) {
     }}
    
 async function delAppointment(req, res) {
+    const APP_ID = req.params.appID;
+
     try {
-        
+        const deletedApp = await Appointment.findByIdAndDelete(APP_ID);
+
+        if (!deletedApp) {
+            return res.status(404).send({ msg: "Appointment not found" });
+        }
+
+        res.status(200).send({ msg: "Appointment deleted successfully" });
 
     } catch (error) {
-        res.status(500).send({ success: false, msg: "Server Error" })
-
+        res.status(500).send({ success: false, msg: "Server Error" });
     }
 }
 
