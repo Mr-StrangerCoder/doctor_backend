@@ -4,13 +4,12 @@ const Doctor = require("../models/doctorModel")
 
 
 async function createAppointment(req, res) {
-        console.log(req.body)
-
+    console.log(req.body)
 
     try {
-        newAppoint = await Appointment.create(req.body)
-        newAppoint.save()
-        res.status(200).send({msg:"Appointment Created Successfully"})
+        const newAppoint = await Appointment.create(req.body)
+        // newAppoint.save()
+        res.status(200).send({ msg: "Appointment Created Successfully" })
     } catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })
 
@@ -20,7 +19,7 @@ async function createAppointment(req, res) {
 async function getAllAppointments(req, res) {
     try {
         const apps = await Appointment.find()
-        .populate({
+            .populate({
                 path: "user_id",
                 select: "name"
             })
@@ -31,7 +30,7 @@ async function getAllAppointments(req, res) {
                     select: "name"
                 }
             });
-               const updatedApps = apps.map(app => {
+        const updatedApps = apps.map(app => {
             const appObj = app.toObject();
 
             return {
@@ -42,7 +41,7 @@ async function getAllAppointments(req, res) {
                 status: appObj.status
             };
         });
-        res.status(200).send({apps:updatedApps})
+        res.status(200).send({ apps: updatedApps })
 
     } catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })
@@ -51,8 +50,8 @@ async function getAllAppointments(req, res) {
 }
 async function getAppointmentsByUser(req, res) {
     try {
-             const apps = await Appointment.find({user_id:req.user.ID})
-             .populate({
+        const apps = await Appointment.find({ user_id: req.user.ID })
+            .populate({
                 path: "user_id",
                 select: "name"
             })
@@ -63,7 +62,7 @@ async function getAppointmentsByUser(req, res) {
                     select: "name"
                 }
             });
-               const updatedApps = apps.map(app => {
+        const updatedApps = apps.map(app => {
             const appObj = app.toObject();
 
             return {
@@ -74,7 +73,7 @@ async function getAppointmentsByUser(req, res) {
                 status: appObj.status
             };
         });
-        res.status(200).send({apps:updatedApps})
+        res.status(200).send({ apps: updatedApps })
 
 
     } catch (error) {
@@ -86,10 +85,10 @@ async function getAppointmentOfDoctor(req, res) {
     console.log(req.user.ID)
     try {
 
-            const loggedInDoc = await Doctor.findOne({user_id:req.user.ID},{_id:1})
-            console.log("***********",loggedInDoc)
-           const apps = await Appointment.find({doctor_id:loggedInDoc})
-           .populate({
+        const loggedInDoc = await Doctor.findOne({ user_id: req.user.ID }, { _id: 1 })
+        console.log("***********", loggedInDoc)
+        const apps = await Appointment.find({ doctor_id: loggedInDoc })
+            .populate({
                 path: "user_id",
                 select: "name"
             })
@@ -100,7 +99,7 @@ async function getAppointmentOfDoctor(req, res) {
                     select: "name"
                 }
             });
-               const updatedApps = apps.map(app => {
+        const updatedApps = apps.map(app => {
             const appObj = app.toObject();
 
             return {
@@ -111,22 +110,26 @@ async function getAppointmentOfDoctor(req, res) {
             };
         });
 
-        res.status(200).send({apps:updatedApps})
+        res.status(200).send({ apps: updatedApps })
 
     } catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })
-    }}
-   
+    }
+}
+
 async function delAppointment(req, res) {
     const APP_ID = req.params.appID;
 
     try {
-        const deletedApp = await Appointment.findByIdAndDelete(APP_ID);
-
-        if (!deletedApp) {
+        const appointment = await Appointment.findById(APP_ID);
+        if (!appointment) {
             return res.status(404).send({ msg: "Appointment not found" });
         }
 
+        if (appointment.user_id.toString() !== req.user.ID) {
+            return res.status(403).send({ msg: "Not authorized to delete this appointment" });
+        }
+        await Appointment.findByIdAndDelete(APP_ID);
         res.status(200).send({ msg: "Appointment deleted successfully" });
 
     } catch (error) {
@@ -162,12 +165,12 @@ async function updateAppointment(req, res) {
 async function statusUpdate(req, res) {
     console.log(req.params.appID)
     console.log((req.body.status))
-    const APP_ID =req.params.appID
+    const APP_ID = req.params.appID
     const status = req.body.status
     try {
-        const updatedApp = await Appointment.findByIdAndUpdate(APP_ID,{status:status})
-updatedApp.save()
-        res.status(200).send({msg:"Appointment updated successfully"})
+        const updatedApp = await Appointment.findByIdAndUpdate(APP_ID, { status: status })
+        updatedApp.save()
+        res.status(200).send({ msg: "Appointment updated successfully" })
     } catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })
 
@@ -176,7 +179,7 @@ updatedApp.save()
 
 
 module.exports = {
-    createAppointment, getAllAppointments, getAppointmentsByUser,getAppointmentOfDoctor,
+    createAppointment, getAllAppointments, getAppointmentsByUser, getAppointmentOfDoctor,
 
     delAppointment, updateAppointment, statusUpdate
 }

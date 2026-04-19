@@ -10,15 +10,15 @@ try{
 
     const existsDoctor = await Doctor.findOne({user_id:user_Id})
     if(existsDoctor){
-        res.status(400).send({msg:"already exists"})
+      return  res.status(400).send({msg:"already exists"})
     }else{
-        const newDoctor = await Doctor.create({
+        await Doctor.create({
             user_id:user_Id,
             Qualification:Qualification,
             specialization:specialization,
             fees:fees,
         })
-        newDoctor.save()
+        // newDoctor.save()
         res.status(200).send({msg:"You have appied succesfully"})
     }
         } catch (error) {

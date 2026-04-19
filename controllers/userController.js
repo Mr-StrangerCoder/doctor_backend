@@ -4,7 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Doctor = require('../models/doctorModel')
 
-const BASE_URL = 'http://localhost:5000/upload/';
+const BASE_URL = `http://localhost:5000/upload/`;
 
 
 const register = async (req,res) =>{
@@ -27,7 +27,7 @@ const register = async (req,res) =>{
             const today = new Date()
             const userAge = today.getFullYear() - birthDay.getFullYear()
 
-            const newUser =await User.create({
+            await User.create({
                 name:name,
                 email:email,
                 password:hashPassword,
@@ -37,7 +37,7 @@ const register = async (req,res) =>{
                 gender:gender,
                 DOB:DOB
             })
-            await newUser.save()
+            // await newUser.save()
             res.status(200).send({ success: true, msg: "registered successfully" })
 
         }
@@ -56,12 +56,12 @@ const login = async (req,res) =>{
                 const alreadyUser = await User.findOne( { email: email } )
         console.log(alreadyUser)
         if(!alreadyUser) {
-            res.status(400).send({ msg: "User not found" })
+          return  res.status(400).send({ msg: "User not found" })
         } else {
          const checkPassword = await bcryptjs.compare(password, alreadyUser.password)
             console.log(checkPassword)
             if (!checkPassword) {
-                res.status(400).send({ msg: "Invalid Password" })
+               return res.status(400).send({ msg: "Invalid Password" })
             } else {
 
                 const ID = alreadyUser._id
@@ -112,7 +112,7 @@ const getAllUsers = async (req,res)=>{
 
             return userObj;
         });
-        res.status(200).send({users:updatedUsers})
+        res.status(200).send({success: true, users:updatedUsers})
     }catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })
         
@@ -149,7 +149,55 @@ const getAllDoctors = async(req,res)=>{
         
     }
 }
+const updateUser = async (req, res) => {
+    const user_Id = req.params.user_Id
 
+    try {
+    
+        if (req.user.ID !== user_Id) {
+            return res.status(403).send({ msg: "Not authorized to update this user" })
+        }
+
+        if (req.body.password) {
+            const salt = await bcryptjs.genSalt(8)
+            req.body.password = await bcryptjs.hash(req.body.password, salt)
+        }
+
+        if (req.body.DOB) {
+            const birthDay = new Date(req.body.DOB)
+            const today = new Date()
+            req.body.age = today.getFullYear() - birthDay.getFullYear()
+        }
+
+        if (req.file) {
+            req.body.img_path = req.file.filename
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            user_Id,
+            req.body,
+            { new: true, runValidators: true }
+        ).select('-password') 
+
+        if (!updatedUser) {
+            return res.status(404).send({ msg: "User not found" })
+        }
+
+        
+        const userObj = updatedUser.toObject()
+        userObj.img_path = userObj.img_path ? BASE_URL + userObj.img_path : null
+
+        res.status(200).send({ 
+            success: true, 
+            msg: "User updated successfully", 
+            user: userObj 
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ success: false, msg: "Server Error" })
+    }
+}
 
 
 module.exports = {
@@ -157,6 +205,7 @@ module.exports = {
     login,
     getUserInfo,
     getAllUsers,
-    getAllDoctors
+    getAllDoctors,
+    updateUser 
    
 }

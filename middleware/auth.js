@@ -10,13 +10,13 @@ function auth(req,res,next){
 
 let token = req.headers.authorization
 if(!token){
-    res.status(400).send({"msg":"Please Login"})
+ return res.status(400).send({"msg":"Please Login"})
 }
 try{
 if(token.startsWith("Bearer ")){
     token = token.split(" ")[1]
     console.log(token,"in auth file********")
-    const decoded = jwt.verify(token, process.env.SECREAT_KEY)
+    const decoded = jwt.verify(token, process.env.SECRET_KEY)
 console.log(decoded, "In auth file")
 req.user = decoded 
 console.log(req.user.ID,"In auth file")
@@ -26,6 +26,7 @@ console.log(req.user.ID,"In auth file")
 }
 
         } catch (err) {
+            console.log(err, "auth***********************88")
             return res.status(401).send({ msg: "Invalid Token" })
         }
 

@@ -5,7 +5,7 @@ const User = require('./userModel')
 const doctorSchema = new mongoose.Schema({
     user_id:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:User
+        ref:"User"
     },
     Qualification:{
         type:String
