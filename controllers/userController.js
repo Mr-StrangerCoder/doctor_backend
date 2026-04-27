@@ -4,7 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Doctor = require('../models/doctorModel')
 
-const BASE_URL = `http://localhost:5000/upload/`;
+const BASE_URL = `http://localhost:5002/upload/`;
 
 
 const register = async (req,res) =>{
@@ -49,35 +49,41 @@ const register = async (req,res) =>{
 } 
 
 
-const login = async (req,res) =>{
-        console.log(req.body)
-    const { email, password } = req.body
-    try{
-                const alreadyUser = await User.findOne( { email: email } )
-        console.log(alreadyUser)
-        if(!alreadyUser) {
-          return  res.status(400).send({ msg: "User not found" })
-        } else {
-         const checkPassword = await bcryptjs.compare(password, alreadyUser.password)
-            console.log(checkPassword)
-            if (!checkPassword) {
-               return res.status(400).send({ msg: "Invalid Password" })
-            } else {
-
-                const ID = alreadyUser._id
-                const role = alreadyUser.role
-                console.log(ID,"******ID")
-                const genToken = jwt.sign({ ID: ID,role:role }, process.env.SECRET_KEY, { expiresIn: "1h" })
-                console.log(genToken,"******")
-                console.log("SECRET at sign time:", process.env.SECRET_KEY)
-                res.status(202).send({success:true, msg: "Login successful", token: genToken })
-            }
-
-        }
-    } catch (error) {
-        res.status(500).send({ success: false, msg: "Server Error" })
-        
+const login = async (req, res) => {
+  console.log(req.body)
+  const { email, password } = req.body
+  try {
+    const alreadyUser = await User.findOne({ email: email })
+    if (!alreadyUser) {
+      return res.status(400).send({ msg: "User not found" })
     }
+ 
+    const checkPassword = await bcryptjs.compare(password, alreadyUser.password)
+    if (!checkPassword) {
+      return res.status(400).send({ msg: "Invalid Password" })
+    }
+ 
+    const ID = alreadyUser._id
+    const role = alreadyUser.role
+    const genToken = jwt.sign({ ID: ID, role: role }, process.env.SECRET_KEY, { expiresIn: "1h" })
+ 
+    // FIX: return user info along with token so frontend can use it
+    res.status(202).send({
+      success: true,
+      msg: "Login successful",
+      token: genToken,
+      user: {
+        _id: alreadyUser._id,
+        name: alreadyUser.name,
+        email: alreadyUser.email,
+        role: alreadyUser.role,
+        img_path: alreadyUser.img_path || null,
+      }
+    })
+ 
+  } catch (error) {
+    res.status(500).send({ success: false, msg: "Server Error" })
+  }
 }
 
 const getUserInfo = async(req,res) =>{
