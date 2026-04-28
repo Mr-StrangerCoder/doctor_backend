@@ -10,9 +10,9 @@ const doctorRouter = require('./routes/doctorRoute')
 const port = process.env.PORT || 5010
 const app = express()
 
-// FIX: Allow all localhost origins during development
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"],
+  origin: ["http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"]
