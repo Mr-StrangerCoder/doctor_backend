@@ -50,7 +50,7 @@ async function getAllAppointments(req, res) {
 }
 async function getAppointmentsByUser(req, res) {
     try {
-        const apps = await Appointment.find({ user_id: req.user.ID })
+        const apps = await Appointment.find({ user_id: req.user.id })
             .populate({
                 path: "user_id",
                 select: "name"
@@ -82,10 +82,10 @@ async function getAppointmentsByUser(req, res) {
     }
 }
 async function getAppointmentOfDoctor(req, res) {
-    console.log(req.user.ID)
+    console.log(req.user.id)
     try {
 
-        const loggedInDoc = await Doctor.findOne({ user_id: req.user.ID }, { _id: 1 })
+        const loggedInDoc = await Doctor.findOne({ user_id: req.user.id }, { _id: 1 })
         console.log("***********", loggedInDoc)
         const apps = await Appointment.find({ doctor_id: loggedInDoc })
             .populate({
@@ -126,7 +126,7 @@ async function delAppointment(req, res) {
             return res.status(404).send({ msg: "Appointment not found" });
         }
 
-        if (appointment.user_id.toString() !== req.user.ID) {
+        if (appointment.user_id.toString() !== req.user.id.toString()) {
             return res.status(403).send({ msg: "Not authorized to delete this appointment" });
         }
         await Appointment.findByIdAndDelete(APP_ID);
@@ -169,7 +169,7 @@ async function statusUpdate(req, res) {
     const status = req.body.status
     try {
         const updatedApp = await Appointment.findByIdAndUpdate(APP_ID, { status: status })
-        updatedApp.save()
+        // updatedApp.save()
         res.status(200).send({ msg: "Appointment updated successfully" })
     } catch (error) {
         res.status(500).send({ success: false, msg: "Server Error" })

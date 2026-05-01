@@ -4,7 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Doctor = require('../models/doctorModel')
 
-const BASE_URL = `http://localhost:5002/upload/`;
+const BASE_URL = `http://localhost:5010/upload/`;
 
 
 const register = async (req,res) =>{
@@ -65,7 +65,7 @@ const login = async (req, res) => {
  
     const ID = alreadyUser._id
     const role = alreadyUser.role
-    const genToken = jwt.sign({ ID: ID, role: role }, process.env.SECRET_KEY, { expiresIn: "1h" })
+    const genToken = jwt.sign({ id: ID, role: role }, process.env.SECRET_KEY, { expiresIn: "1h" })
  
     // FIX: return user info along with token so frontend can use it
     res.status(202).send({
@@ -89,7 +89,7 @@ const login = async (req, res) => {
 const getUserInfo = async(req,res) =>{
 
     try {
-                const ID = req.user.ID
+                const ID = req.user.id
         const loggedUserInfo = await User.findById(ID, {password:0})
         console.log("$$$$$$$$$$$$",loggedUserInfo)
 
@@ -160,7 +160,7 @@ const updateUser = async (req, res) => {
 
     try {
     
-        if (req.user.ID !== user_Id) {
+        if (req.user.id.toString() !== user_Id) {
             return res.status(403).send({ msg: "Not authorized to update this user" })
         }
 

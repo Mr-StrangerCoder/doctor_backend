@@ -5,7 +5,7 @@ async function  applyDoctor(req,res){
 
     console.log(req.body)
     const {Qualification,specialization, fees} = req.body
-    const user_Id = req.user.ID
+    const user_Id = req.user.id
 try{
 
     const existsDoctor = await Doctor.findOne({user_id:user_Id})
@@ -66,8 +66,25 @@ async function isDoctor(req,res){
     }
 }
 
+async function getAllDoctors(req, res) {
+    try {
+        const doctors = await Doctor.find({ isDoctor: false })
+            .populate({
+                path: "user_id",
+                select: "name email"
+            })
+
+        res.status(200).send({ data: doctors })
+
+    } catch (error) {
+        res.status(500).send({ success: false, msg: "Server Error" })
+    }
+}
+
+
 module.exports = {
     applyDoctor,
     appliedDoctors,
-    isDoctor
+    isDoctor,
+    getAllDoctors
 }

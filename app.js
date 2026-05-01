@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 
 app.use('/user', userRouter)
 app.use('/doctor', doctorRouter)
-app.use('/appoint', require('./routes/appointmentRoute'))
+app.use('/appointment', require('./routes/appointmentRoute')) 
 
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
