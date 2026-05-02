@@ -4,7 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Doctor = require('../models/doctorModel')
 
-const BASE_URL = `http://localhost:5002/upload/`;
+const BASE_URL = `http://localhost:5010/upload/`;
 
 
 const register = async (req, res) => {
