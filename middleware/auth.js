@@ -19,11 +19,11 @@ function auth(req, res, next) {
             const decoded = jwt.verify(token, process.env.SECRET_KEY)
             console.log(decoded, "In auth file")
             req.user = {
-                id: decoded.id,        // 👈 use small id
+                ID: decoded.ID,        
                 role: decoded.role
             }
             // req.user = decoded
-            console.log(req.user.id, "In auth file")
+            console.log(req.user.ID, "In auth file")
             next()
         } else {
             res.status(400).send({ "msg": "Not authorized" })

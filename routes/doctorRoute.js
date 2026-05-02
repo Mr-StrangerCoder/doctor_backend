@@ -9,6 +9,6 @@ router.post("/applyDoctor",auth , doctorController.applyDoctor)  //only docter
 router.get("/appliedDoctors",auth,admin, doctorController.appliedDoctors) //admin 
 
 router.patch('/isDoctor/:doctorID', auth, admin, doctorController.isDoctor) //admin
-router.get("/doctors", auth,admin, doctorController.getAllDoctors) //admin user
+router.get("/doctors", auth, doctorController.getAllDoctors) //admin user
 
 module.exports = router

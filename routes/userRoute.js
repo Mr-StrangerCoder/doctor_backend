@@ -12,9 +12,9 @@ router.get('/getUserInfo',auth, userController.getUserInfo)
 
 router.patch('/updateUser/:user_Id', auth, upload.single('myFile'), userController.updateUser) //user
 
-router.get('/getAllUsers',auth,admin, userController.getAllUsers) // admin
+router.get('/getAllUsers',auth, userController.getAllUsers) // only admin
 
-router.get('/getAllDoctors',auth,admin, userController.getAllDoctors) //user  admin
+router.get('/getAllDoctors',auth, userController.getAllDoctors) //user  admin
 
 module.exports =router
 
