@@ -4,7 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const Doctor = require('../models/doctorModel')
 
-const BASE_URL = `https://doctor-frontend-ebon.vercel.app/upload/`;
+const BASE_URL = `https://doctor-backend-ad66.onrender.com/upload/`;
 
 
 const register = async (req, res) => {
