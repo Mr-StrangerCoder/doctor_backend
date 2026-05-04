@@ -7,6 +7,19 @@ const Doctor = require('../models/doctorModel')
 const BASE_URL = `https://doctor-backend-ad66.onrender.com/upload/`;
 
 
+const calculateAge = (DOB) => {
+  if (!DOB) return 0;
+  const birthDay = new Date(DOB);
+  if (isNaN(birthDay)) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - birthDay.getFullYear();
+  const monthDiff = today.getMonth() - birthDay.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 const register = async (req, res) => {
   console.log(req.body, req.file);
   const { name, email, password, contactNumber, gender, DOB } = req.body;
@@ -21,7 +34,7 @@ const register = async (req, res) => {
     const salt = await bcryptjs.genSalt(8);
     const hashPassword = await bcryptjs.hash(password, salt);
 
-    const userAge = new Date().getFullYear() - new Date(DOB).getFullYear();
+    const userAge = calculateAge(DOB); 
 
     await User.create({
       name,
@@ -41,7 +54,6 @@ const register = async (req, res) => {
     res.status(500).send({ success: false, msg: "Server Error" });
   }
 };
-
 
 const login = async (req, res) => {
   console.log(req.body);
@@ -70,7 +82,7 @@ const login = async (req, res) => {
         name: alreadyUser.name,
         email: alreadyUser.email,
         role: alreadyUser.role,
-        img_path: alreadyUser.img_path || null,
+        img_path: alreadyUser.img_path ? BASE_URL + alreadyUser.img_path : null,
       },
     });
 
@@ -78,7 +90,6 @@ const login = async (req, res) => {
     res.status(500).send({ success: false, msg: "Server Error" });
   }
 };
-
 
 const getUserInfo = async (req, res) => {
   try {
@@ -105,7 +116,6 @@ const getUserInfo = async (req, res) => {
   }
 };
 
-
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}, { name: 1, email: 1, contactNumber: 1, role: 1, DOB: 1, img_path: 1, gender: 1, age: 1 });
@@ -122,7 +132,6 @@ const getAllUsers = async (req, res) => {
     res.status(500).send({ success: false, msg: "Server Error" });
   }
 };
-
 
 const getAllDoctors = async (req, res) => {
   try {
@@ -149,7 +158,6 @@ const getAllDoctors = async (req, res) => {
   }
 };
 
-
 const updateUser = async (req, res) => {
   const user_Id = req.params.user_Id;
 
@@ -163,9 +171,8 @@ const updateUser = async (req, res) => {
       req.body.password = await bcryptjs.hash(req.body.password, salt);
     }
 
-    
     if (req.body.DOB) {
-      req.body.age = calculateAge(req.body.DOB);
+      req.body.age = calculateAge(req.body.DOB); 
     }
 
     if (req.file) {
